@@ -593,9 +593,7 @@ app.post("/schedule/edit", (req, res) => {
         var snowbirdValues = [] // arrays snowbirdValues and snowkatValues store the contents of aforementioned input fields
         var snowkatValues = []
 
-        var groups = Object.values(req.body)
         var fieldNames = Object.keys(req.body)
-        var groupCount = groups.length - 1; // groups.length but we offset by one because req.body.year is included in the original count
         var stmt = "DELETE FROM `schedule` WHERE `year`=?" // Clear out any previous entries under entered year
 
         con.query(stmt, [req.body.year])
@@ -609,13 +607,17 @@ app.post("/schedule/edit", (req, res) => {
             firstSaturday.setDate(firstSaturday.getDate() + 1)
         }
         
-        for (let i = 0; i < groupCount; i++) { // determine which field belongs to which side
+        for (let i = 0; i < fieldNames.length; i++) { // determine which field belongs to which side
+            if (fieldNames[i] == "_csrf" || fieldNames[i] == "year") {
+                continue
+            }
+
             if (fieldNames[i].substring(0, 9) == "snowbirds") {
                 snowbirds.push(fieldNames[i])
-                snowbirdValues.push(groups[i])
+                snowbirdValues.push(req.body[fieldNames[i]])
             }else {
                 snowkats.push(fieldNames[i])
-                snowkatValues.push(groups[i])
+                snowkatValues.push(req.body[fieldNames[i]])
             }
         }
 
